@@ -15,11 +15,11 @@ flag weeks with z-score > 3.0 within 90 days of a restatement event."}}
 
 ## Evidence
 
-| Artifact         | URN / location                                  |
-| ---------------- | ----------------------------------------------- |
-| Evidence dataset | {{evidence_dataset_urn}}                        |
-| DataJob (SQL)    | {{datajob_urn}}                                 |
-| Source datasets  | {{input_urns, one per line}}                    |
+| Artifact         | URN / location               |
+| ---------------- | ---------------------------- |
+| Evidence dataset | {{evidence_dataset_urn}}     |
+| DataJob (SQL)    | {{datajob_urn}}              |
+| Source datasets  | {{input_urns, one per line}} |
 
 **Row count:** {{n}} — **Key rows:** {{2–3 rows that carry the finding}}
 

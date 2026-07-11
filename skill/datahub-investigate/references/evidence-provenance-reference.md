@@ -7,11 +7,11 @@ that requires SDK emission against GMS.
 
 ## Entities per finding
 
-| Entity        | Purpose                                    | Key aspects                                |
-| ------------- | ------------------------------------------ | ------------------------------------------ |
-| Dataset       | The materialized evidence table            | schema, description, tags, custom props    |
-| DataFlow      | The investigation (one per case)           | name, description                          |
-| DataJob       | One hunt run within the investigation      | verbatim SQL in properties, input/output   |
+| Entity   | Purpose                               | Key aspects                              |
+| -------- | ------------------------------------- | ---------------------------------------- |
+| Dataset  | The materialized evidence table       | schema, description, tags, custom props  |
+| DataFlow | The investigation (one per case)      | name, description                        |
+| DataJob  | One hunt run within the investigation | verbatim SQL in properties, input/output |
 
 ## Minimal emission pattern
 

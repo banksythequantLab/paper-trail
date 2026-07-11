@@ -5,3 +5,4 @@ __pycache__/
 data/*.duckdb
 data/*.duckdb.wal
 examples/lineage_screenshots/*.png
+agent_run*.log

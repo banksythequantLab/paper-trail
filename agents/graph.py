@@ -79,8 +79,13 @@ def _local_tools():
                             confidence: str) -> str:
         """Record a finding in the DataHub ledger with lineage. input_tables are
         warehouse tables the SQL read from. confidence: low|medium|high."""
-        ev, job = ledger.record_finding(hunt_id, title, narrative, sql,
-                                        evidence_table, input_tables, confidence=confidence)
+        try:
+            ev, job = ledger.record_finding(hunt_id, title, narrative, sql,
+                                            evidence_table, input_tables, confidence=confidence)
+        except Exception as e:  # noqa: BLE001 -- a tool error must never crash the graph
+            return (f"RECORD ERROR (fix and retry): {e}. If the evidence table "
+                    f"does not exist yet, run materialize_evidence to create "
+                    f"'{evidence_table}' first, then record the finding again.")
         return f"ledger written: evidence={ev} task={job}"
 
     return [run_sql, materialize_evidence, record_finding_tool]

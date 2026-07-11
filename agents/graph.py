@@ -38,7 +38,11 @@ SYSTEM = """You are Paper Trail, a forensic data investigator. Rules:
    search tool's `filter` is a DSL STRING, not JSON — e.g.
    entity_type = 'dataset' AND platform = 'duckdb'. `sort_by` is a plain
    field-name string. When a tool errors, change your arguments — never
-   repeat the same call."""
+   repeat the same call.
+7. FINISH STRONG: your final message must be a structured summary titled
+   FINDINGS with numbered items — each naming the dataset, owner, risk, and
+   the evidence (table/URN) behind it. Do not end mid-thought or announce
+   further checks you will not perform."""
 
 def _local_tools():
     """LangChain tools wrapping the warehouse + ledger."""
@@ -105,6 +109,12 @@ def _arg_coercion_hook(tools):
                     args.pop("sort_by")
             for k, v in list(args.items()):
                 spec = props.get(k, {})
+                enum = spec.get("enum") or next(
+                    (a["enum"] for a in spec.get("anyOf", []) + spec.get("oneOf", [])
+                     if "enum" in a), None)
+                if enum and v not in enum:
+                    args.pop(k)  # invalid enum value; let the default apply
+                    continue
                 ptype = spec.get("type") or next(
                     (a.get("type") for a in spec.get("anyOf", []) + spec.get("oneOf", [])
                      if a.get("type") not in (None, "null")), None)
@@ -125,9 +135,21 @@ async def build_agent():
     from langgraph.prebuilt import create_react_agent
     client = MultiServerMCPClient(MCP_CONFIG)
     tools = await client.get_tools() + _local_tools()
-    model = ChatOllama(
+    class RetryingChatOllama(ChatOllama):
+        """llama-server 400s on malformed tool-call JSON; retry (temp>0 diverges)."""
+        async def _agenerate(self, *a, **k):
+            last = None
+            for _ in range(3):
+                try:
+                    return await super()._agenerate(*a, **k)
+                except Exception as e:  # noqa: BLE001
+                    last = e
+            raise last
+
+    model = RetryingChatOllama(
         model=os.getenv("PAPER_TRAIL_MODEL", "qwen3:30b-a3b-instruct-2507-q4_K_M"),
-        temperature=0,
+        # small temperature so a retry after a malformed tool call can diverge
+        temperature=float(os.getenv("PAPER_TRAIL_TEMPERATURE", "0.2")),
         num_ctx=int(os.getenv("PAPER_TRAIL_NUM_CTX", "32768")),
         num_predict=int(os.getenv("PAPER_TRAIL_NUM_PREDICT", "2048")),
     )
@@ -138,13 +160,16 @@ async def investigate(directive: str, stream: bool = False):
     import sys
     agent = await build_agent()
     inputs = {"messages": [("user", directive)]}
-    config = {"recursion_limit": 40}
+    # each turn = 3 graph steps (agent + coercion hook + tools); 100 ≈ 33 turns
+    config = {"recursion_limit": int(os.getenv("PAPER_TRAIL_RECURSION", "100"))}
     if not stream:
         result = await agent.ainvoke(inputs, config)
         return result["messages"][-1].content
     last = None
     async for update in agent.astream(inputs, config, stream_mode="updates"):
         for node, payload in update.items():
+            if node == "agent":  # raw pre-coercion emission; hook re-emits final form
+                continue
             for msg in (payload or {}).get("messages", []):
                 msg.pretty_print()
                 sys.stdout.flush()

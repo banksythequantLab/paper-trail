@@ -1,0 +1,8 @@
+{
+  "hunt_id": "hunt4_orphaned_ownership",
+  "title": "Financially-material datasets with departed/implicated owners",
+  "narrative": "Ownership forensics over the DataHub estate found 3 dataset(s) whose accountable owner is departed and/or implicated in the public record, without certification: finance.executive_summary_report (owner: andrew.fastow -- owner implicated (public record); owner departed; financially material; not certified); finance.restatement_events (owner: richard.causey -- owner implicated (public record); owner departed; financially material; not certified); finance.spe_entities (owner: richard.causey -- owner implicated (public record); owner departed; financially material; not certified). An uncertified, financially-material report owned by an indicted officer has no accountable steward -- figures derived from it cannot be attested. Recommend ownership transfer to an active steward and certification review before any downstream use.",
+  "evidence_dataset": "urn:li:dataset:(urn:li:dataPlatform:duckdb,paper_trail.analytics.hunt4_orphaned_ownership,PROD)",
+  "producing_task": "urn:li:dataJob:(urn:li:dataFlow:(paper_trail,investigations,PROD),hunt4_orphaned_ownership)",
+  "evidence_properties": {}
+}

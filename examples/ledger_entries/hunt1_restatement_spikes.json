@@ -1,0 +1,13 @@
+{
+  "hunt_id": "hunt1_restatement_spikes",
+  "title": "Anomalous Finance-Trading communication surge in restatement window",
+  "narrative": "Cross-department email volume between Finance/Accounting and Trading shows 1 anomalous week(s) (z >= 2.0 vs. Jan-2000..Jul-2001 baseline of ~5.0/week) during Aug-Dec 2001, the window surrounding Enron's Q3 loss announcement (Oct 16), SEC inquiry (Oct 22), and restatement 8-K (Nov 8). Peak week 2001-10-08 00:00:00 reached 18 messages (z=4.43). Pattern is consistent with coordination between the groups ahead of and during the disclosure window. Individual threads in the peak weeks warrant content-level review (see hunt #2).",
+  "evidence_dataset": "urn:li:dataset:(urn:li:dataPlatform:duckdb,paper_trail.analytics.hunt1_comm_spikes,PROD)",
+  "producing_task": "urn:li:dataJob:(urn:li:dataFlow:(paper_trail,investigations,PROD),hunt1_restatement_spikes)",
+  "evidence_properties": {
+    "reviewed_by": "solti",
+    "review_note": "z=4.43 spike verified against public disclosure timeline (validated in session Jul 10)",
+    "review_verdict": "confirmed",
+    "reviewed_at": "2026-07-10 21:54:08"
+  }
+}

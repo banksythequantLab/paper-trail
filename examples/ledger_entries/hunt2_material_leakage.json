@@ -1,0 +1,8 @@
+{
+  "hunt_id": "hunt2_material_leakage",
+  "title": "Pre-disclosure external transmission of undisclosed-SPE material",
+  "narrative": "120 emails referencing undisclosed special-purpose vehicles (Chewco, LJM1/2, Raptor, JEDI, Braveheart -- all disclosed=false in finance.spe_entities) were sent to 43 addresses outside the @enron.com perimeter BEFORE the first public disclosure on 2001-10-16. Top external domains: aol.com (44), velaw.com (22), cwt.com (10), swbell.net (9). Notable: SPE valuation material forwarded to personal webmail (e.g. 'FW: LJM/Raptor valuations' to an @aol.com address, Oct 8 2001) and to outside counsel (velaw.com) during the pre-disclosure window. Term matching is lexical; individual messages require content-level review to separate business-as-usual legal correspondence from genuine leakage.",
+  "evidence_dataset": "urn:li:dataset:(urn:li:dataPlatform:duckdb,paper_trail.analytics.hunt2_external_leakage,PROD)",
+  "producing_task": "urn:li:dataJob:(urn:li:dataFlow:(paper_trail,investigations,PROD),hunt2_material_leakage)",
+  "evidence_properties": {}
+}

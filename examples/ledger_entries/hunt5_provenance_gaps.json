@@ -1,0 +1,8 @@
+{
+  "hunt_id": "hunt5_provenance_gaps",
+  "title": "Financially-material datasets with no documented provenance",
+  "narrative": "Provenance audit of the DataHub estate: of the datasets carrying the FinanciallyMaterial glossary term, 3 have NO documented lineage path to any source system: finance.executive_summary_report, finance.restatement_events, finance.spe_entities. Nobody can say where these figures came from -- in an audit context an unexplained financially-material report is itself a red flag (who compiled finance.spe_entities? what feeds the executive summary?). Contrast: every staging and curated table walks back to the raw corpus, and every Paper Trail evidence set walks back through its producing task. Recommend lineage backfill or decommissioning before these are cited.",
+  "evidence_dataset": "urn:li:dataset:(urn:li:dataPlatform:duckdb,paper_trail.analytics.hunt5_provenance_gaps,PROD)",
+  "producing_task": "urn:li:dataJob:(urn:li:dataFlow:(paper_trail,investigations,PROD),hunt5_provenance_gaps)",
+  "evidence_properties": {}
+}

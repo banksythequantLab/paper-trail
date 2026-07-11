@@ -1,0 +1,8 @@
+{
+  "hunt_id": "hunt3_spe_web",
+  "title": "Unclassified SPE-pattern entities in communication web",
+  "narrative": "Entity co-mention analysis across the corpus surfaced 8 vehicle-like entities that co-occur heavily with known special-purpose entities but appear NOWHERE in finance.spe_entities and carry no RelatedParty glossary classification: marlin (416), osprey (380), yosemite (162), rawhide (105), fishtail (76), talon (72), condor (28), porcupine (23) (co-mention totals with known SPEs). Several are documented off-balance-sheet vehicles in the public record (Talon was the internal entity of Raptor I; Marlin and Osprey funded Whitewing; Yosemite issued credit-linked notes). PROPOSAL: classify these entities RelatedParty/SPE in the glossary and extend finance.spe_entities. Awaiting human review -- this finding is tagged pending-review until an investigator confirms or rejects it.",
+  "evidence_dataset": "urn:li:dataset:(urn:li:dataPlatform:duckdb,paper_trail.analytics.hunt3_spe_web,PROD)",
+  "producing_task": "urn:li:dataJob:(urn:li:dataFlow:(paper_trail,investigations,PROD),hunt3_spe_web)",
+  "evidence_properties": {}
+}

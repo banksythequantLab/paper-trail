@@ -22,7 +22,7 @@ HUNTS = {
     "hunt1_comm_spikes": {
         "title": "Hunt 1 - Communication spikes",
         "question": "Did email volume around key entities spike before the restatement?",
-        "finding": "Week of Oct 22 2001: z=4.43 volume anomaly, 3 days before the SEC inquiry disclosure.",
+        "finding": "Week of Oct 8 2001: z=4.43 volume anomaly, 8 days before Enron's Oct 16 Q3-loss announcement.",
     },
     "hunt2_external_leakage": {
         "title": "Hunt 2 - External leakage",

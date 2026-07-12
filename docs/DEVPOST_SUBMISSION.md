@@ -13,7 +13,7 @@ Paper Trail works the public Enron email corpus (435,259 messages) like a forens
 
 | # | Hunt | Finding |
 |---|------|---------|
-| 1 | Restatement-window comm spikes | z=4.43 email-volume anomaly in the days before the SEC inquiry became public |
+| 1 | Restatement-window comm spikes | z=4.43 email-volume anomaly the week of Oct 8 2001 — 8 days before Enron's Oct 16 Q3-loss announcement |
 | 2 | Material-info leakage | 120 pre-disclosure emails about undisclosed SPEs reached 43 external addresses (incl. personal AOL accounts and `ljminvestments.com`) |
 | 3 | SPE shadow web | 8 off-glossary shadow vehicles (marlin, osprey, talon, yosemite, rawhide, fishtail, condor, porcupine) co-mentioned with known SPEs — all real Enron entities |
 | 4 | Orphaned ownership | 3 financially-material datasets owned by departed, implicated officers (Fastow, Causey); none certified |
@@ -56,8 +56,8 @@ DataHub (OSS) · mcp-server-datahub · LangGraph · Ollama (qwen3-30b-a3b) · Du
 ## Honest labeling (keep this in the submission)
 The email corpus is real and public (CMU Enron corpus, May 2015 release). The `finance.*` tables (transactions, SPE entities, restatement events) are reconstructed for the demo from the public record and labeled as such in their DataHub descriptions. Entity names, dates, and disclosure windows follow the historical record.
 
-## Before submitting — reconcile these (Claude's notes)
-1. **README says the LLM agent uses Claude / `ANTHROPIC_API_KEY`; it now runs on local Ollama (qwen3-30b).** Update README §Architecture + Quickstart step 7 so the repo matches the "fully local, no API" pitch.
-2. **README §Architecture describes a 5-sub-agent supervisor (Intake/Scout/Analyst/Tracer/Scribe); the LLM `agents/graph.py` is a single ReAct agent.** Align the wording (or note the sub-agents are the deterministic hunt pipeline) so a judge reading the code isn't confused.
-3. Hunt-1 timing differs between README (week of Oct 22 2001, ~3 days pre-SEC-inquiry) and DEMO_RUNBOOK (week of Oct 8, 8 days pre-announcement). Pick one and make both docs agree.
+## Before submitting — one note left (Claude's)
+Resolved: the README now says the LLM agent runs on local Ollama (was Claude/Anthropic), and hunt-1 timing is reconciled everywhere to the verified value — **week of Oct 8 2001, 8 days before the Oct 16 Q3-loss announcement, z=4.43** (from the hunt-1 ledger entry; README + `ui/case_board.py` fixed to match).
+
+Still your call: README §Architecture describes a 5-sub-agent supervisor (Intake/Scout/Analyst/Tracer/Scribe), but the LLM `agents/graph.py` is a single ReAct agent — reword (or note the sub-agents are the deterministic hunt pipeline) so a judge reading the code isn't confused.
 

@@ -35,7 +35,7 @@ The hardest part was making a local 30B model reliable at MCP tool-calling. Loca
 - **Auditability:** five clicks from an accusation to the raw email that supports it — no black-box verdicts.
 - **Governance-as-a-hunt:** hunt 5 finds the fraud *in the data governance itself* — orphaned, unlineaged, financially-material tables owned by departed officers.
 - **Runs fully local** (qwen3-30b via Ollama): no data leaves the box and runs reproduce offline — the privacy properties that matter in finance/compliance. The headline is the *auditable output*, not that it's local.
-- **Reliability:** deterministic mode is 100% reproducible (`verify_hunts.py` → VERIFY_PASS); the guarded LLM mode lands a clean FINDINGS summary in **__/10** runs, 0 recursion failures (measuring now).
+- **Reliability by design:** the deterministic hunts are the backbone — `verify_hunts.py` reproduces all five findings end-to-end, every run. The LLM agent demonstrates the *same* investigation autonomously (grounds, queries, self-corrects, ends with a FINDINGS summary) on a warm run; it's a best-effort capability, not batch-reliable — which is exactly why the reproducible hunts, not the model, are what the evidence ledger depends on.
 - The pattern is **reusable and upstreamed** as a DataHub skill (PR #34).
 
 ## What we learned
@@ -60,5 +60,5 @@ The email corpus is real and public (CMU Enron corpus, May 2015 release). The `f
 ## Status (Claude's notes)
 All three doc issues the judges flagged are now fixed in the repo: LLM backend corrected to local Ollama; hunt-1 timing reconciled to **week of Oct 8 2001, 8 days before the Oct 16 Q3-loss announcement, z=4.43** (README + `ui/case_board.py`); and the README architecture rewritten to describe the actual single ReAct agent + deterministic hunts (was overclaimed as a 5-agent supervisor). A "why not just lineage?" section was added per judge feedback.
 
-Open before submitting: (1) record the demo video; (2) drop in the LLM reliability number (campaign running — e.g. "N/10 clean runs, 0 recursion failures"); (3) optional live hosted catalog for the Aug 17–31 window.
+Open before submitting: (1) record the demo video (use a warm run — the local model slows under sustained back-to-back load); (2) optional live hosted catalog for the Aug 17–31 window. Reliability is framed deterministic-first (5/5 hunts always; LLM = best-effort autonomous demo) after a repeat-run test showed the local 30B degrades under continuous load — so we don't claim an LLM pass-rate.
 

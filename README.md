@@ -73,6 +73,8 @@ Stack: DataHub OSS quickstart (Docker) · `mcp-server-datahub` (mutations
 enabled) · DuckDB warehouse · LangGraph + a local open model (qwen3-30b-a3b
 via Ollama; provider-swappable via env) · Streamlit case board.
 
+**Reliability.** The deterministic hunts are the reproducible backbone — `verify_hunts.py` reproduces all five findings end-to-end on every run. The LLM agent runs the same investigation autonomously and lands a clean FINDINGS summary on a warm run, but it's best-effort (a local 30B slows and varies under sustained load) — so the scripted hunts, not the model, are the source of truth the evidence ledger depends on.
+
 ## Quickstart
 
 ```bash

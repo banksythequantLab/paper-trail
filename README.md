@@ -33,6 +33,10 @@ Every hunt terminates in an **evidence-provenance ledger entry**:
 lineage tab → DataJob (SQL visible) → staging tables → raw mailbox files.
 Five clicks from accusation to evidence.
 
+## Why not just lineage?
+
+Lineage tells you _what_ connects to _what_. An evidence ledger also answers _why a finding exists_: the hypothesis and thresholds live in the evidence dataset's description, the **verbatim SQL** that produced it lives in the DataJob, _who approved it and when_ is stamped into properties on review, and _how the case evolved_ is visible across runs. Ordinary catalog lineage can't answer "who signed off on this, and on what basis?" — a chain of custody can. That's the difference between metadata as documentation and metadata as evidence.
+
 ## The five hunts (all confirmed on the real corpus)
 
 | # | Hunt | Finding |

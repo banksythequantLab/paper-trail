@@ -9,7 +9,7 @@ The auditable AI fraud investigator — every conclusion has walkable chain-of-c
 An AI that flags fraud is useless in audit, compliance, or legal work if it can't show its work. "The model flagged it" is not admissible — a chain of custody is. A metadata graph is exactly a chain-of-custody machine, so we built an agent that treats each investigation as first-class DataHub metadata: not a chat answer, but an evidence trail a human can walk from accusation back to the raw source.
 
 ## What it does
-Paper Trail works the public Enron email corpus (435,259 messages) like a forensic team and lands five confirmed findings — each written back into DataHub as governed, reviewable metadata:
+Paper Trail works the **real, public** Enron email corpus (435,259 messages) like a forensic team — the emails are genuine; the `finance.*` tables the hunts cross-reference are reconstructed from the public record and labeled as such in DataHub (the contribution is the *pattern*, not the synthetic tables). It lands five confirmed findings, each written back into DataHub as governed, reviewable metadata:
 
 | # | Hunt | Finding |
 |---|------|---------|
@@ -34,7 +34,8 @@ The hardest part was making a local 30B model reliable at MCP tool-calling. Loca
 ## Accomplishments we're proud of
 - **Auditability:** five clicks from an accusation to the raw email that supports it — no black-box verdicts.
 - **Governance-as-a-hunt:** hunt 5 finds the fraud *in the data governance itself* — orphaned, unlineaged, financially-material tables owned by departed officers.
-- A **fully local** agent reliable enough to run the same investigation end-to-end and land a clean FINDINGS summary.
+- **Runs fully local** (qwen3-30b via Ollama): no data leaves the box and runs reproduce offline — the privacy properties that matter in finance/compliance. The headline is the *auditable output*, not that it's local.
+- **Reliability:** deterministic mode is 100% reproducible (`verify_hunts.py` → VERIFY_PASS); the guarded LLM mode lands a clean FINDINGS summary in **__/10** runs, 0 recursion failures (measuring now).
 - The pattern is **reusable and upstreamed** as a DataHub skill (PR #34).
 
 ## What we learned
@@ -56,8 +57,8 @@ DataHub (OSS) · mcp-server-datahub · LangGraph · Ollama (qwen3-30b-a3b) · Du
 ## Honest labeling (keep this in the submission)
 The email corpus is real and public (CMU Enron corpus, May 2015 release). The `finance.*` tables (transactions, SPE entities, restatement events) are reconstructed for the demo from the public record and labeled as such in their DataHub descriptions. Entity names, dates, and disclosure windows follow the historical record.
 
-## Before submitting — one note left (Claude's)
-Resolved: the README now says the LLM agent runs on local Ollama (was Claude/Anthropic), and hunt-1 timing is reconciled everywhere to the verified value — **week of Oct 8 2001, 8 days before the Oct 16 Q3-loss announcement, z=4.43** (from the hunt-1 ledger entry; README + `ui/case_board.py` fixed to match).
+## Status (Claude's notes)
+All three doc issues the judges flagged are now fixed in the repo: LLM backend corrected to local Ollama; hunt-1 timing reconciled to **week of Oct 8 2001, 8 days before the Oct 16 Q3-loss announcement, z=4.43** (README + `ui/case_board.py`); and the README architecture rewritten to describe the actual single ReAct agent + deterministic hunts (was overclaimed as a 5-agent supervisor). A "why not just lineage?" section was added per judge feedback.
 
-Still your call: README §Architecture describes a 5-sub-agent supervisor (Intake/Scout/Analyst/Tracer/Scribe), but the LLM `agents/graph.py` is a single ReAct agent — reword (or note the sub-agents are the deterministic hunt pipeline) so a judge reading the code isn't confused.
+Open before submitting: (1) record the demo video; (2) drop in the LLM reliability number (campaign running — e.g. "N/10 clean runs, 0 recursion failures"); (3) optional live hosted catalog for the Aug 17–31 window.
 

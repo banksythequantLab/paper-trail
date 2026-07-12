@@ -49,15 +49,20 @@ deliberate governance defects — bootstrapped into DataHub.
 
 ## Architecture
 
+Two ways to run the same investigation — both write the same ledger:
+
+- **Deterministic mode** — five scripted hunts (`hunts/hunt1–5.py`), each moving through the phases below. Reproducible, no LLM; `verify_hunts.py` walks every trail end-to-end (→ VERIFY_PASS).
+- **LLM mode** — a single **LangGraph ReAct agent** (`agents/graph.py`) on a local open model (qwen3-30b-a3b via Ollama), driven by a system prompt that enforces the same phases and an "evidence or silence" rule. Guardrails (argument-coercion hook, retry wrapper, repeat-loop-breaker, turn-budget nudge) keep the local model reliable at MCP tool-calling.
+
+The phases every investigation moves through:
+
 ```
-LangGraph supervisor
- ├─ Intake   — directive → investigation plan; reads prior ledger (cumulative cases)
- ├─ Scout    — grounds in metadata: search, schemas, tags, glossary, query context
- ├─ Analyst  — metadata-grounded SQL → DuckDB → statistical checks
- ├─ Tracer   — lineage traversal: blast radius, provenance verification
- └─ Scribe   — writes findings back: evidence Datasets + DataJobs + lineage
-                (acryl-datahub SDK — MCP mutations can't create these entities)
- Reviewer (human) — pending-review → confirmed/rejected via CLI or DataHub UI
+ Ground   metadata first: search, schemas, tags, glossary, query context
+ Analyze  metadata-grounded SQL -> DuckDB -> statistical checks
+ Trace    lineage traversal: blast radius, provenance verification
+ Scribe   write findings back: evidence Datasets + DataJobs + lineage
+          (acryl-datahub SDK; MCP mutations can't create these entities)
+ Review   human flips pending-review -> confirmed/rejected (CLI or DataHub UI)
 ```
 
 Stack: DataHub OSS quickstart (Docker) · `mcp-server-datahub` (mutations
@@ -101,7 +106,7 @@ start Ollama with `qwen3:30b-a3b-instruct-2507-q4_K_M`, then run
 ```
 paper-trail/
 ├── ingest/        # warehouse build, DataHub bootstrap, smoke tests, verification
-├── agents/        # LangGraph supervisor, reviewer CLI, SDK/metadata helpers
+├── agents/        # LangGraph ReAct agent, reviewer CLI, SDK/metadata helpers
 ├── hunts/         # the five hunt definitions (method + thresholds + emission)
 ├── ui/            # Streamlit case board
 ├── examples/      # generated SQL, ledger entries, lineage screenshots

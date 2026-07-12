@@ -49,7 +49,7 @@ Metadata isn't documentation — it's the substrate for trustworthy AI. When eve
 DataHub (OSS) · mcp-server-datahub · LangGraph · Ollama (qwen3-30b-a3b) · DuckDB · acryl-datahub SDK · Streamlit · Python
 
 ## Links
-- **Repo:** `<add public GitHub URL>`
+- **Repo:** https://github.com/banksythequantLab/paper-trail
 - **Demo video:** `<add link>`
 - **OSS skill PR:** https://github.com/datahub-project/datahub-skills/pull/34
 
@@ -60,3 +60,4 @@ The email corpus is real and public (CMU Enron corpus, May 2015 release). The `f
 1. **README says the LLM agent uses Claude / `ANTHROPIC_API_KEY`; it now runs on local Ollama (qwen3-30b).** Update README §Architecture + Quickstart step 7 so the repo matches the "fully local, no API" pitch.
 2. **README §Architecture describes a 5-sub-agent supervisor (Intake/Scout/Analyst/Tracer/Scribe); the LLM `agents/graph.py` is a single ReAct agent.** Align the wording (or note the sub-agents are the deterministic hunt pipeline) so a judge reading the code isn't confused.
 3. Hunt-1 timing differs between README (week of Oct 22 2001, ~3 days pre-SEC-inquiry) and DEMO_RUNBOOK (week of Oct 8, 8 days pre-announcement). Pick one and make both docs agree.
+

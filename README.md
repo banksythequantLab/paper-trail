@@ -61,8 +61,8 @@ LangGraph supervisor
 ```
 
 Stack: DataHub OSS quickstart (Docker) · `mcp-server-datahub` (mutations
-enabled) · DuckDB warehouse · LangGraph + Claude (provider-swappable via env)
-· Streamlit case board.
+enabled) · DuckDB warehouse · LangGraph + a local open model (qwen3-30b-a3b
+via Ollama; provider-swappable via env) · Streamlit case board.
 
 ## Quickstart
 
@@ -92,7 +92,9 @@ python -m streamlit run ui/case_board.py
 ```
 
 LLM-driven investigation (optional; hunts run deterministically without it):
-set `ANTHROPIC_API_KEY` in `.env`, then run `agents/graph.py`.
+start Ollama with `qwen3:30b-a3b-instruct-2507-q4_K_M`, then run
+`python -m agents.graph "<your directive>"`. Fully local — no API key.
+(Provider-swappable to any OpenAI-compatible endpoint via env.)
 
 ## Repo layout
 

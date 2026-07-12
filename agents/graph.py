@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv(pathlib.Path(__file__).resolve().parents[1] / ".env")
 
-VENV = r"B:\paper-trail\.venv\Scripts"
+VENV = os.getenv("PAPER_TRAIL_VENV", r"B:\paper-trail\.venv\Scripts")
 MCP_CONFIG = {
     "datahub": {
         "transport": "stdio",
-        "command": rf"{VENV}\mcp-server-datahub.exe",
+        "command": os.getenv("PAPER_TRAIL_MCP_DATAHUB", rf"{VENV}\mcp-server-datahub.exe"),
         "args": [],
         "env": {
             "DATAHUB_GMS_URL": os.getenv("DATAHUB_GMS_URL", "http://localhost:8080"),

@@ -1,7 +1,8 @@
 """Read-only DuckDB access for analyst agents + evidence writer."""
+import os
 import duckdb
 
-WAREHOUSE = r"B:\paper-trail\data\warehouse.duckdb"
+WAREHOUSE = os.getenv("PAPER_TRAIL_WAREHOUSE", r"B:\paper-trail\data\warehouse.duckdb")
 
 def query(sql: str, params=None):
     """Run read-only SQL, return (columns, rows)."""

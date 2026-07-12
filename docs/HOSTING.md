@@ -39,13 +39,18 @@ The qwen3-30b agent needs ~24 GB VRAM. Keeping a rented GPU up 24/7 for the two-
 5. **Cloudflare Tunnel:** install `cloudflared`, create a tunnel, route `catalog.<domain>` → `localhost:9002` and `board.<domain>` → `localhost:8601`. Optionally gate with Cloudflare Access so only judges get in.
 6. **Verify by Aug 17:** open both URLs in an incognito browser; confirm lineage + case board render with findings.
 
-## Portability fixes (for a Linux host)
+## Portability (env vars)
 
-Hardcoded for the local Windows box today:
+These local paths are now **env-overridable**; defaults equal the Windows box, so nothing changes locally. On a Linux host, set:
 
-- **`agents/tools/warehouse.py`** → `WAREHOUSE = r"B:\paper-trail\data\warehouse.duckdb"`. Make it an env var: `os.getenv("PAPER_TRAIL_WAREHOUSE", ...)`, so the case board finds the DB on Linux.
-- **`agents/tools/ledger.py`** → `GMS = "http://localhost:8080"`. Fine if the findings replay runs **on the host**; parameterize (`os.getenv("DATAHUB_GMS_URL", ...)`) only if you emit from off-box.
-- **`agents/graph.py`** → `MCP_CONFIG` uses `VENV = r"B:\paper-trail\.venv\Scripts"` + `mcp-server-datahub.exe` (Windows). Only matters if you host the **live agent** (Tier B); the always-on catalog never runs the agent.
+| Env var | Overrides | Default |
+| --- | --- | --- |
+| `PAPER_TRAIL_WAREHOUSE` | DuckDB path (`warehouse.py`) | `B:\paper-trail\data\warehouse.duckdb` |
+| `DATAHUB_GMS_URL` | GMS URL (`ledger.py` + agent MCP) | `http://localhost:8080` |
+| `PAPER_TRAIL_VENV` | venv bin dir (`graph.py`) | `B:\paper-trail\.venv\Scripts` |
+| `PAPER_TRAIL_MCP_DATAHUB` | full path to `mcp-server-datahub` (`graph.py`) | `<VENV>\mcp-server-datahub.exe` |
+
+For the always-on catalog you only need `PAPER_TRAIL_WAREHOUSE` (the case board). `PAPER_TRAIL_VENV` / `PAPER_TRAIL_MCP_DATAHUB` matter only if you host the live agent (Tier B) — e.g. `.venv/bin/mcp-server-datahub` on Linux. If the findings replay runs on the box, `DATAHUB_GMS_URL` can stay default.
 
 ## Optional — API-backed live agent (Tier B)
 

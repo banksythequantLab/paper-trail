@@ -2,6 +2,7 @@
 metadata. Every finding = evidence Dataset + DataJob (with exact SQL) +
 lineage + pending-review tag. This IS the paper trail.
 """
+import os
 import time
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.emitter.rest_emitter import DatahubRestEmitter
@@ -19,7 +20,7 @@ from datahub.metadata.schema_classes import (
 )
 from .warehouse import describe
 
-GMS = "http://localhost:8080"
+GMS = os.getenv("DATAHUB_GMS_URL", "http://localhost:8080")
 FLOW_URN = make_data_flow_urn("paper_trail", "investigations", "PROD")
 TYPEMAP = {"VARCHAR": StringTypeClass, "BIGINT": NumberTypeClass, "INTEGER": NumberTypeClass,
            "DOUBLE": NumberTypeClass, "DATE": DateTypeClass, "BOOLEAN": BooleanTypeClass,

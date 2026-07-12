@@ -38,7 +38,7 @@ Five clicks from accusation to evidence.
 | # | Hunt | Finding |
 |---|------|---------|
 | 1 | Restatement-window comm spikes | z=4.43 volume anomaly the week of Oct 8 2001 — 8 days before Enron's Oct 16 Q3-loss announcement (18 msgs vs ~5/wk) |
-| 2 | Material-info leakage | 120 pre-disclosure emails referencing undisclosed SPEs reached 43 external addresses — including personal AOL accounts and `ljminvestments.com` itself |
+| 2 | Material-info leakage | 120 pre-disclosure emails referencing undisclosed SPEs reached 43 external addresses — top domains aol.com (personal webmail), velaw.com + cwt.com (outside counsel), swbell.net |
 | 3 | SPE shadow web | 8 shadow vehicles co-mentioned heavily with known SPEs but absent from the glossary (marlin, osprey, talon, yosemite, rawhide, fishtail, condor, porcupine) — all real Enron entities |
 | 4 | Orphaned ownership | 3 financially-material datasets owned by implicated, departed officers (Fastow, Causey); none certified |
 | 5 | Provenance gaps | The same 3 datasets have zero documented lineage — the meta-hunt: finding fraud in data *governance* itself |

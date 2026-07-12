@@ -14,7 +14,7 @@ Paper Trail works the public Enron email corpus (435,259 messages) like a forens
 | # | Hunt | Finding |
 |---|------|---------|
 | 1 | Restatement-window comm spikes | z=4.43 email-volume anomaly the week of Oct 8 2001 — 8 days before Enron's Oct 16 Q3-loss announcement |
-| 2 | Material-info leakage | 120 pre-disclosure emails about undisclosed SPEs reached 43 external addresses (incl. personal AOL accounts and `ljminvestments.com`) |
+| 2 | Material-info leakage | 120 pre-disclosure emails about undisclosed SPEs reached 43 external addresses (top domains: personal AOL webmail, outside counsel velaw.com/cwt.com) |
 | 3 | SPE shadow web | 8 off-glossary shadow vehicles (marlin, osprey, talon, yosemite, rawhide, fishtail, condor, porcupine) co-mentioned with known SPEs — all real Enron entities |
 | 4 | Orphaned ownership | 3 financially-material datasets owned by departed, implicated officers (Fastow, Causey); none certified |
 | 5 | Provenance gaps | those same 3 datasets have zero documented lineage — fraud in the data governance itself |

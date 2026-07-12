@@ -28,7 +28,7 @@ HUNTS = {
         "title": "Hunt 2 - External leakage",
         "question": "Did SPE-related material leave the company before public disclosure?",
         "finding": "120 pre-disclosure emails referencing undisclosed SPEs reached 43 external addresses, "
-                   "including personal AOL accounts and ljminvestments.com itself.",
+                   "including personal AOL webmail and outside counsel (velaw.com, cwt.com).",
     },
     "hunt3_spe_web": {
         "title": "Hunt 3 - The SPE shadow web",

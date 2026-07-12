@@ -1,0 +1,13 @@
+# Paper Trail - runtime dependencies (Python 3.11+; developed on 3.12).
+# Pinned to tested versions. `mcp-server-datahub` also provides the `datahub`
+# CLI used by the deterministic hunts and the datahub-investigate skill.
+# (streamlit pulls pandas/numpy transitively; langgraph pulls its own stack.)
+langgraph==1.2.9
+langchain-core==1.4.9
+langchain-ollama==1.1.0
+langchain-mcp-adapters==0.3.0
+acryl-datahub==1.6.0.13
+mcp-server-datahub==0.6.0
+duckdb==1.5.4
+streamlit==1.59.1
+python-dotenv==1.2.2

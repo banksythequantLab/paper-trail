@@ -79,8 +79,8 @@ via Ollama; provider-swappable via env) · Streamlit case board.
 # 1. DataHub quickstart (needs ~8GB Docker RAM); UI at localhost:9002
 datahub docker quickstart
 
-# 2. Python env
-python -m venv .venv && .venv/Scripts/pip install -e .
+# 2. Python env (Python 3.11+)
+python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
 
 # 3. Warehouse + metadata bootstrap (schemas, owners, glossary, lineage, defects)
 python ingest/build_warehouse.py

@@ -30,8 +30,9 @@ SYSTEM = """You are Paper Trail, a forensic data investigator. Rules:
    FinanciallyMaterial data; explain why it was necessary.
 3. EVIDENCE OR SILENCE: every claim must cite an evidence table you materialized
    and the exact SQL that produced it.
-4. WRITE BACK: record findings via the ledger (record_finding) and update_description /
-   add_tags so the next investigator inherits your work.
+4. WRITE BACK: record findings via the ledger (record_finding). You may also
+   update_description / add_tags, but if a tag/label call errors (e.g. the tag
+   does not exist), do NOT retry it -- the finding is already recorded; move on.
 5. Findings are tagged pending-review; a human confirms or rejects. Never
    present a finding as confirmed.
 6. TOOL CALL HYGIENE: omit optional parameters unless you need them. The
@@ -105,6 +106,8 @@ def _arg_coercion_hook(tools):
     schemas = {t.name: (t.args or {}) for t in tools}
     seen = Counter()  # (tool, args) signatures seen this run -> break repeat loops
     repeat_limit = int(os.getenv("PAPER_TRAIL_REPEAT_LIMIT", "3"))
+    summary_turn = int(os.getenv("PAPER_TRAIL_SUMMARY_TURN", "22"))  # force FINDINGS near budget
+    turns = [0]
     def _is_stringy(spec):
         if spec.get("type") == "string":
             return True
@@ -112,6 +115,7 @@ def _arg_coercion_hook(tools):
                    for alt in spec.get("anyOf", []) + spec.get("oneOf", []))
     def hook(state):
         last = state["messages"][-1]
+        turns[0] += 1
         for tc in getattr(last, "tool_calls", None) or []:
             props = schemas.get(tc["name"], {})
             args = tc.get("args") or {}
@@ -144,7 +148,14 @@ def _arg_coercion_hook(tools):
             # zero-result repeat can't burn the recursion limit before FINDINGS.
             sig = (tc["name"], json.dumps(args, sort_keys=True, default=str))
             seen[sig] += 1
-            if tc["name"] != "investigator_note" and seen[sig] >= repeat_limit:
+            if tc["name"] != "investigator_note" and turns[0] >= summary_turn:
+                tc["args"] = {"note": (
+                    f"STEP BUDGET NEARLY EXHAUSTED (turn {turns[0]}). Do NOT call any more "
+                    f"tools. Write your final FINDINGS summary NOW as your reply: a numbered "
+                    f"list, each item naming the dataset, owner, risk, and evidence table/URN "
+                    f"(system rule 7).")}
+                tc["name"] = "investigator_note"
+            elif tc["name"] != "investigator_note" and seen[sig] >= repeat_limit:
                 tc["args"] = {"note": (
                     f"You have issued this exact {tc['name']} call {seen[sig]} times "
                     f"with identical arguments and it returned nothing new. STOP "

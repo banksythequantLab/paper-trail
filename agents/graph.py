@@ -88,13 +88,23 @@ def _local_tools():
                     f"'{evidence_table}' first, then record the finding again.")
         return f"ledger written: evidence={ev} task={job}"
 
-    return [run_sql, materialize_evidence, record_finding_tool]
+    @tool
+    def investigator_note(note: str) -> str:
+        """Internal loop-breaker. You normally never call this directly; the
+        investigator redirects a repeated tool call here to relay guidance.
+        Returns the note verbatim."""
+        return note
+
+    return [run_sql, materialize_evidence, record_finding_tool, investigator_note]
 
 def _arg_coercion_hook(tools):
     """Local models often pass dicts where MCP tool schemas want JSON strings.
     Coerce dict/list args to json.dumps(...) when the schema type is string."""
     import json
+    from collections import Counter
     schemas = {t.name: (t.args or {}) for t in tools}
+    seen = Counter()  # (tool, args) signatures seen this run -> break repeat loops
+    repeat_limit = int(os.getenv("PAPER_TRAIL_REPEAT_LIMIT", "3"))
     def _is_stringy(spec):
         if spec.get("type") == "string":
             return True
@@ -130,6 +140,18 @@ def _arg_coercion_hook(tools):
                         args[k] = [v]
                 elif isinstance(v, (dict, list)) and _is_stringy(spec):
                     args[k] = json.dumps(v)
+            # loop-breaker: redirect an identical, repeated call to a nudge so a
+            # zero-result repeat can't burn the recursion limit before FINDINGS.
+            sig = (tc["name"], json.dumps(args, sort_keys=True, default=str))
+            seen[sig] += 1
+            if tc["name"] != "investigator_note" and seen[sig] >= repeat_limit:
+                tc["args"] = {"note": (
+                    f"You have issued this exact {tc['name']} call {seen[sig]} times "
+                    f"with identical arguments and it returned nothing new. STOP "
+                    f"repeating it. If you have gathered enough evidence, write your "
+                    f"final FINDINGS summary now (system rule 7). Otherwise change "
+                    f"your arguments or use a different tool.")}
+                tc["name"] = "investigator_note"
         return {"messages": [last]}
     return hook
 

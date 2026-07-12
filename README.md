@@ -132,7 +132,9 @@ Email data is real and public (CMU Enron corpus). The `finance.*` tables
 (transactions, SPE entities, restatement events) are **reconstructed for
 demo** from the public record and labeled as such in their DataHub
 descriptions. The hunts' entity names, dates, and disclosure windows follow
-the historical record.
+the historical record — see [`docs/ground_truth.md`](docs/ground_truth.md) for the
+finding-by-finding mapping to the documented Enron case (Fastow/Causey, the real
+SPEs, the real timeline).
 
 ## License
 

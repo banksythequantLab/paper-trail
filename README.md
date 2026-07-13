@@ -111,6 +111,25 @@ Run it: `python actions/pt_webhook_receiver.py` on the host, then
 is the difference between metadata as a *logbook* and metadata as a *control
 plane* — a confirmed finding or a raised incident can now **trigger work**.
 
+## The review rejects false positives (red-team control)
+
+An "auditable investigator" is only trustworthy if it can also say *no*.
+`hunts/hunt6_decoy_volume.py` is a planted control: a deliberately naive volume
+detector that flags the single biggest communication surge in the disclosure
+window — **1,399 messages the week of the SEC inquiry (Oct 22 2001), z=6.6**. On
+its face that looks like coordinated activity. It isn't: the sender is
+`no.address@enron.com`, Enron's automated internal-broadcast address (weekend
+outage reports, org announcements, training notices). A human reviewer
+**rejects** it, and the rejection — who, when, and why — is stamped into the
+ledger exactly like a confirmation:
+
+![The red-team decoy, flagged then rejected as a false positive, with the reason stamped in the ledger](docs/img/09-decoy-rejected.png)
+
+So the pipeline doesn't just confirm what it's fed — it flags candidates and the
+human filters the false positives, and a *rejection* is first-class auditable
+metadata, not a silent delete. That's the difference between a demo that only
+finds what was planted and a review process with teeth.
+
 ## Why not just lineage?
 
 Lineage tells you _what_ connects to _what_. An evidence ledger also answers _why a finding exists_: the hypothesis and thresholds live in the evidence dataset's description, the **verbatim SQL** that produced it lives in the DataJob, _who approved it and when_ is stamped into properties on review, and _how the case evolved_ is visible across runs. Ordinary catalog lineage can't answer "who signed off on this, and on what basis?" — a chain of custody can. That's the difference between metadata as documentation and metadata as evidence.

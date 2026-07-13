@@ -151,7 +151,7 @@ Stack: DataHub OSS quickstart (Docker) · `mcp-server-datahub` (mutations
 enabled) · DuckDB warehouse · LangGraph + a local open model (qwen3-30b-a3b
 via Ollama; provider-swappable via env) · Streamlit case board.
 
-**Reliability.** The deterministic hunts are the reproducible backbone — `verify_hunts.py` reproduces all five findings end-to-end on every run. The LLM agent runs the same investigation autonomously and lands a clean FINDINGS summary on a warm run, but it's best-effort (a local 30B slows and varies under sustained load) — so the scripted hunts, not the model, are the source of truth the evidence ledger depends on.
+**Reliability & value-level verification.** The deterministic hunts are the reproducible backbone. Two gates guard them: `verify_hunts.py` checks every paper trail is *shaped* right (evidence dataset → DataJob with SQL → lineage), and **`verify_golden.py` goes further — it re-derives every headline number from the warehouse (z=4.43 the week of Oct 8, the 6 exhibit messages, 120 leaked emails to 43 external addresses, the 8 shadow vehicles, the Fastow/Causey datasets) and asserts each against a checked-in golden**, so a silent drift in any hunt's logic fails the gate, not just a missing SQL string. Because the deterministic hunts and the LLM agent write the *same* evidence tables, the golden gate verifies whichever produced them: run an agent investigation, then run the gate — a passing agent has to reproduce the golden trail. The LLM agent lands a clean FINDINGS summary on a warm run but is best-effort (a local 30B slows and varies under sustained load) — so the scripted hunts, not the model, remain the source of truth the ledger depends on.
 
 ## Quickstart
 
@@ -170,7 +170,8 @@ python ingest/datahub_bootstrap.py
 python hunts/hunt1_restatement_spikes.py   # ... through hunt5
 
 # 5. Verify every paper trail end-to-end
-python ingest/verify_hunts.py              # → VERIFY_PASS
+python ingest/verify_hunts.py              # → VERIFY_PASS  (shape: dataset+SQL+lineage)
+python ingest/verify_golden.py             # → GOLDEN_PASS  (values: z=4.43, 120/43, ...)
 
 # 6. Review findings (the HITL step)
 python -m agents.reviewer list

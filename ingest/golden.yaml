@@ -1,0 +1,40 @@
+# Golden finding values -- the canonical numbers each hunt must reproduce.
+# Derived from the real CMU Enron corpus in the warehouse. verify_golden.py
+# re-derives these from the evidence tables and asserts they match EXACTLY, so a
+# value regression (e.g. a z-score silently drifting from 4.43) fails the gate --
+# not just a missing SQL string. The same evidence tables are written by the
+# deterministic hunts and by the LLM agent, so this gate verifies both modes.
+
+hunt1_restatement_spikes:
+  flagged_weeks: 1
+  peak_week: "2001-10-08"
+  peak_volume: 18
+  peak_zscore: 4.43
+
+hunt1_exhibits:
+  edges: 18
+  distinct_messages: 6
+  sender: jeffrey.mcmahon@enron.com
+  recipients:
+    - david.delainey@enron.com
+    - john.lavorato@enron.com
+    - louise.kitchen@enron.com
+
+hunt2_external_leakage:
+  distinct_predisclosure_emails: 120
+  distinct_external_addresses: 43
+  top_domain: aol.com
+  must_include_domains: [velaw.com, cwt.com, swbell.net]
+
+hunt3_spe_web:
+  co_mention_threshold: 20
+  shadow_vehicles: [marlin, osprey, talon, yosemite, rawhide, fishtail, condor, porcupine]
+
+hunt4_orphaned_ownership:
+  flagged_datasets: 3
+  datasets: [finance.executive_summary_report, finance.restatement_events, finance.spe_entities]
+  owners: [andrew.fastow, richard.causey]
+
+hunt5_provenance_gaps:
+  flagged_datasets: 3
+  datasets: [finance.executive_summary_report, finance.restatement_events, finance.spe_entities]

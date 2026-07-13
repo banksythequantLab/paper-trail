@@ -96,6 +96,21 @@ and becomes the system of record for the case.
 
 ![Confirming a finding raises a native DataHub Incident on the asset](docs/img/07-incident.png)
 
+## Event-driven: DataHub *fires actions*, not just stores state
+
+The incident isn't the end of the loop. A custom **DataHub Action** (`actions/`)
+runs inside the `datahub-actions` container, subscribes to DataHub's own Kafka
+event stream, and fires a webhook the moment a review tag changes on an asset.
+Confirm a finding and the alert is delivered end-to-end through DataHub's event
+bus — no polling, no Slack, fully self-contained:
+
+![A DataHub Action delivers review events from the event stream to a webhook](docs/img/08-action.png)
+
+Run it: `python actions/pt_webhook_receiver.py` on the host, then
+`datahub actions -c actions/pt_pipeline.yml` inside the actions container. This
+is the difference between metadata as a *logbook* and metadata as a *control
+plane* — a confirmed finding or a raised incident can now **trigger work**.
+
 ## Why not just lineage?
 
 Lineage tells you _what_ connects to _what_. An evidence ledger also answers _why a finding exists_: the hypothesis and thresholds live in the evidence dataset's description, the **verbatim SQL** that produced it lives in the DataJob, _who approved it and when_ is stamped into properties on review, and _how the case evolved_ is visible across runs. Ordinary catalog lineage can't answer "who signed off on this, and on what basis?" — a chain of custody can. That's the difference between metadata as documentation and metadata as evidence.

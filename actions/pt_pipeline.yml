@@ -1,0 +1,22 @@
+# Paper Trail self-contained DataHub Action pipeline.
+# Runs inside the datahub-actions container; consumes DataHub's own event stream
+# (Kafka) and fires a webhook when a review tag changes on an asset. Filtering is
+# done in the action (category == TAG and a Paper Trail review tag), so this stays
+# robust across action-config format changes.
+name: "paper_trail_webhook"
+
+source:
+  type: "kafka"
+  config:
+    connection:
+      bootstrap: ${KAFKA_BOOTSTRAP_SERVER:-broker:29092}
+      schema_registry_url: ${SCHEMA_REGISTRY_URL:-http://datahub-gms:8080/schema-registry/api/}
+
+action:
+  type: "pt_webhook_action:WebhookAction"
+  config:
+    # Local receiver on the host; override with PT_WEBHOOK_URL. No secrets.
+    url: ${PT_WEBHOOK_URL:-http://host.docker.internal:8757/hook}
+
+datahub:
+  server: "http://datahub-gms:8080"

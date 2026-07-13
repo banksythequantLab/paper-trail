@@ -9,3 +9,5 @@ agent_run*.log
 docs/JUDGE_SHEET.md
 docs/JUDGE_PACKET.md
 docs/VIDEO_SCRIPT.md
+actions/pt_alerts.jsonl
+actions/__pycache__/

@@ -98,13 +98,33 @@ that ends where the evidence actually lives.
 ![Lineage: the finding and staging.emails feed the exhibit task that produced the messages](docs/img/06-exhibits-lineage.png)
 
 **8 · The review closes the loop - DataHub *acts*.** Confirming a finding in the
-human-review step raises a native DataHub **Incident** on the asset - a red
-badge, not just a tag. The investigation's state now lives in DataHub's own
-"this asset is under investigation" primitive: category *Fraud Investigation*,
-opened by the reviewer, resolvable in the UI. Metadata stops being a passive log
-and becomes the system of record for the case.
+human-review step raises a native DataHub **Incident** on the **implicated
+production asset** — not the evidence table, the real dataset under suspicion.
+For the ownership-forensics hunt that's the three restatement-implicated finance
+tables (`finance.executive_summary_report`, `finance.restatement_events`,
+`finance.spe_entities`); each gets a red *Fraud Investigation* badge opened by
+the reviewer. The raise is **idempotent** (re-running returns the same incident,
+never a duplicate), and the lifecycle is real: **rejecting or reopening** a
+finding **resolves** the incidents it opened, with the reason recorded. The
+investigation's state now lives in DataHub's own "this asset is under
+investigation" primitive — metadata stops being a passive log and becomes the
+system of record for the case.
 
 ![Confirming a finding raises a native DataHub Incident on the asset](docs/img/07-incident.png)
+
+## The value gate is a native DataHub Assertion
+
+The same golden gate that guards CI is also published *into* DataHub as native
+**custom Assertions** — one per evidence dataset, living in the asset's
+Validation tab (`python ingest/emit_assertions.py`). Each assertion re-derives
+the hunt's headline numbers from the warehouse and reports **SUCCESS / FAILURE**
+with every individual check attached as a result property, so a value regression
+(the z-score silently drifting off 4.43) surfaces as a *failing assertion on the
+data itself* — sitting next to freshness and volume checks, not buried in a CI
+log. Verified end-to-end: **20/20 checks across six evidence datasets report
+green** (`upsertCustomAssertion` + `reportAssertionResult`, idempotent by URN).
+This is the golden gate ported from a script the judges run to a first-class
+DataHub validation signal the catalog carries.
 
 ## Event-driven: DataHub *fires actions*, not just stores state
 
@@ -215,10 +235,13 @@ python hunts/hunt1_restatement_spikes.py   # ... through hunt5
 # 5. Verify every paper trail end-to-end
 python ingest/verify_hunts.py              # → VERIFY_PASS  (shape: dataset+SQL+lineage)
 python ingest/verify_golden.py             # → GOLDEN_PASS  (values: z=4.43, 120/43, ...)
+python ingest/emit_assertions.py           # → ASSERTIONS_OK (publish the gate as native DataHub assertions)
 
-# 6. Review findings (the HITL step)
+# 6. Review findings (the HITL step). accept raises a native Incident on the
+#    implicated asset; reject/reopen resolves it — the full lifecycle.
 python -m agents.reviewer list
 python -m agents.reviewer accept hunt3 --note "verified against public record"
+python -m agents.reviewer reopen hunt3     # resolves the incident + returns to pending
 
 # 7. Case board
 python -m streamlit run ui/case_board.py

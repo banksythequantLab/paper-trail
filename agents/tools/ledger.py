@@ -73,3 +73,39 @@ def record_finding(hunt_id: str, title: str, narrative: str, sql: str,
     for m in mcps:
         emitter.emit_mcp(m)
     return ev_urn, job_urn
+
+
+def record_exhibits(hunt_id: str, finding_table: str, exhibits_table: str,
+                    title: str, description: str, sql: str, input_tables: list,
+                    tags=("evidence", "exhibit")):
+    """Register an exhibits Dataset (the individual raw messages behind a finding)
+    plus its extraction DataJob, so the chain of custody reaches actual emails.
+    Lineage: input_tables (incl. the finding) -> exhibit task -> exhibits_table
+    -> and the exhibit task's inputs include staging.emails, i.e. the raw corpus.
+    Returns (exhibits_urn, job_urn)."""
+    emitter = DatahubRestEmitter(gms_server=GMS)
+    ex_urn = duck_urn(exhibits_table)
+    job_urn = make_data_job_urn("paper_trail", "investigations", f"{hunt_id}_exhibits", "PROD")
+    fields = [SchemaFieldClass(fieldPath=c, nativeDataType=t,
+                type=SchemaFieldDataTypeClass(type=TYPEMAP.get(t.split("(")[0].upper(), StringTypeClass)()))
+              for c, t, *_ in describe(exhibits_table)]
+    mcps = [
+        MetadataChangeProposalWrapper(entityUrn=ex_urn, aspect=DatasetPropertiesClass(
+            name=exhibits_table, description=description)),
+        MetadataChangeProposalWrapper(entityUrn=ex_urn, aspect=SchemaMetadataClass(
+            schemaName=exhibits_table, platform="urn:li:dataPlatform:duckdb", version=0,
+            hash="", platformSchema=OtherSchemaClass(rawSchema=""), fields=fields)),
+        MetadataChangeProposalWrapper(entityUrn=ex_urn, aspect=DomainsClass(
+            domains=[make_domain_urn("investigations")])),
+        MetadataChangeProposalWrapper(entityUrn=ex_urn, aspect=GlobalTagsClass(
+            tags=[TagAssociationClass(tag=make_tag_urn(t)) for t in tags])),
+        MetadataChangeProposalWrapper(entityUrn=job_urn, aspect=DataJobInfoClass(
+            name=title, type="COMMAND",
+            description="Selects the individual messages behind the finding (verbatim SQL below).",
+            customProperties={"sql": sql, "hunt_id": hunt_id, "exhibit_of": finding_table})),
+        MetadataChangeProposalWrapper(entityUrn=job_urn, aspect=DataJobInputOutputClass(
+            inputDatasets=[duck_urn(t) for t in input_tables], outputDatasets=[ex_urn])),
+    ]
+    for m in mcps:
+        emitter.emit_mcp(m)
+    return ex_urn, job_urn

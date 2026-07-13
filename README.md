@@ -1,10 +1,10 @@
 # Paper Trail
 
-**The auditable AI fraud investigator.** A multi-agent system that works the
-Enron email corpus like a forensic team — and every conclusion it reaches has
-walkable chain-of-custody lineage in DataHub. No black-box verdicts: click any
-finding and trace it back through the exact SQL, intermediate datasets, and
-source tables to the raw evidence.
+**The auditable AI fraud investigator.** An AI agent that works the Enron email
+corpus like a forensic team — and every conclusion it reaches has walkable
+chain-of-custody lineage in DataHub, down to the individual emails. No black-box
+verdicts: click any finding and trace it back through the exact SQL, intermediate
+datasets, and source tables to the raw messages that triggered it.
 
 Built for **"Build with DataHub: The Agent Hackathon"** (2026). Apache 2.0.
 
@@ -67,6 +67,24 @@ on the task, byte-for-byte — reproducible, auditable provenance. This is what
 turns "the model flagged it" into a chain of custody.
 
 ![The verbatim SQL stored on the DataJob's properties](docs/img/04-sql.png)
+
+**6 · The exhibits - the actual messages.** The trail doesn't stop at the SQL.
+The producing task has a sibling *exhibits* dataset holding the individual
+messages behind the number: the 18 Finance/Accounting <-> Trading edges (6
+distinct emails) that make up the z=4.43 week - real messages from **Jeffrey
+McMahon (Treasurer)** to **David Delainey, Louise Kitchen, and John Lavorato**
+(the heads of the trading businesses), subject *"2002 Corporate Allocations to
+EIM"*, eight days before the Oct-16 loss announcement.
+
+![The exhibits dataset - the individual emails behind the finding](docs/img/05-exhibits.png)
+
+**7 · Five clicks from accusation to the raw email.** The exhibits' lineage
+closes the loop: the finding *and* `staging.emails` both feed the extraction
+task that produced them, so from any finding you can walk down to the specific
+messages and on to the raw corpus. Not a black-box verdict - a chain of custody
+that ends where the evidence actually lives.
+
+![Lineage: the finding and staging.emails feed the exhibit task that produced the messages](docs/img/06-exhibits-lineage.png)
 
 ## Why not just lineage?
 

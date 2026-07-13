@@ -24,3 +24,22 @@ jobs:
         run: |
           python -m pip install --quiet ruff
           ruff check . --output-format=github || true
+
+  reproduce:
+    name: reproduce findings (no GPU, no DataHub)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install duckdb + pyyaml
+        run: python -m pip install --quiet duckdb pyyaml
+      - name: Recompute hunt-1 z=4.43 from the committed source fixture
+        env:
+          PAPER_TRAIL_WAREHOUSE: data/fixture_warehouse.duckdb
+        run: python ingest/recompute_hunt1.py
+      - name: Value gate on the evidence ledger (all 20 golden numbers)
+        env:
+          PAPER_TRAIL_WAREHOUSE: data/fixture_warehouse.duckdb
+        run: python ingest/verify_golden.py

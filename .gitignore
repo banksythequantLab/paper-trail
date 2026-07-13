@@ -11,3 +11,6 @@ docs/JUDGE_PACKET.md
 docs/VIDEO_SCRIPT.md
 actions/pt_alerts.jsonl
 actions/__pycache__/
+
+# committed CI fixture (exception to data/*.duckdb)
+!data/fixture_warehouse.duckdb

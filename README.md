@@ -223,6 +223,8 @@ PAPER_TRAIL_WAREHOUSE=data/fixture_warehouse.duckdb python ingest/recompute_hunt
 PAPER_TRAIL_WAREHOUSE=data/fixture_warehouse.duckdb python ingest/verify_golden.py     # -> GOLDEN_PASS (20/20)
 ```
 
+**Or just open one page — juror mode.** [`docs/juror.html`](docs/juror.html) is a self-contained, offline evidence page: open it in any browser (no server, no DataHub, no GPU) and read the whole chain of custody top to bottom — the real McMahon emails behind the spike, the verbatim SQL, the re-derived **z=4.43**, the **20/20** value gate, and the native DataHub assertion + incident the finding becomes. Every number on it is re-derived from the committed fixture at build time (`python ingest/build_juror.py`), and CI rebuilds it on every push.
+
 ## Quickstart
 
 ```bash

@@ -43,3 +43,5 @@ jobs:
         env:
           PAPER_TRAIL_WAREHOUSE: data/fixture_warehouse.duckdb
         run: python ingest/verify_golden.py
+      - name: Build the offline juror evidence page (from the fixture)
+        run: python ingest/build_juror.py

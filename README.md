@@ -33,6 +33,41 @@ Every hunt terminates in an **evidence-provenance ledger entry**:
 lineage tab → DataJob (SQL visible) → staging tables → raw mailbox files.
 Five clicks from accusation to evidence.
 
+## What it looks like in DataHub
+
+The walk below is the actual product of a hunt — real entities written to a
+live DataHub instance, not mockups. This is hunt #1 (restatement-window
+communication spikes).
+
+**1 · The evidence ledger.** Every hunt's output lands in the `Investigations`
+domain — each finding a first-class, catalogued asset.
+
+![The Investigations domain in DataHub — the evidence ledger](docs/img/00-domain.png)
+
+**2 · The finding as an evidence dataset.** The hypothesis, method, and
+thresholds live in the description; the review state is carried by tags
+(`risk-flagged` · `confidence-medium` · `confirmed`) and glossary terms
+(`RestrictedPeriod`, `FinanciallyMaterial`).
+
+![The hunt-1 evidence dataset, with finding text and review tags](docs/img/01-evidence.png)
+
+**3 · Walkable lineage.** The finding traces back through its producing task to
+the three source tables it touched (`curated.comm_edges`,
+`finance.restatement_events`, `staging.employees`).
+
+![Lineage graph from source tables through the producing task to the finding](docs/img/02-lineage.png)
+
+**4 · The producing task.** A DataJob holds the method narrative and its
+upstream/downstream lineage — "depends on 3 datasets, used by 1 dataset."
+
+![The producing DataJob and its documentation](docs/img/03-datajob.png)
+
+**5 · The verbatim SQL.** The exact query that produced the finding is stored
+on the task, byte-for-byte — reproducible, auditable provenance. This is what
+turns "the model flagged it" into a chain of custody.
+
+![The verbatim SQL stored on the DataJob's properties](docs/img/04-sql.png)
+
 ## Why not just lineage?
 
 Lineage tells you _what_ connects to _what_. An evidence ledger also answers _why a finding exists_: the hypothesis and thresholds live in the evidence dataset's description, the **verbatim SQL** that produced it lives in the DataJob, _who approved it and when_ is stamped into properties on review, and _how the case evolved_ is visible across runs. Ordinary catalog lineage can't answer "who signed off on this, and on what basis?" — a chain of custody can. That's the difference between metadata as documentation and metadata as evidence.

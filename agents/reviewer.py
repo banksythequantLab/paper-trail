@@ -13,7 +13,7 @@ from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.emitter.mce_builder import make_dataset_urn, make_tag_urn
 from datahub.metadata.schema_classes import (
     DatasetPropertiesClass, GlobalTagsClass, TagAssociationClass)
-from agents.tools.metadata import get_graph, table_name
+from agents.tools.metadata import get_graph, table_name, raise_incident
 
 PENDING = make_tag_urn("pending-review")
 
@@ -61,16 +61,43 @@ def cmd_review(graph, key, verdict, note):
         emitter.emit_mcp(MetadataChangeProposalWrapper(entityUrn=urn, aspect=aspect))
     print(f"[reviewer] {tbl}: {verdict} by {reviewer} at {stamp}"
           + (f' -- "{note}"' if note else ""))
+    if verdict == "confirmed":
+        inc = raise_incident(
+            graph, urn, title=f"Confirmed finding: {tbl}",
+            description=(f"Investigator {reviewer} confirmed this finding on {stamp}."
+                         + (f' Note: {note}.' if note else "")
+                         + " Raised automatically by the Paper Trail review workflow;"
+                           " the implicated data is now under investigation in DataHub."))
+        print(f"[reviewer] raised DataHub incident: {inc}")
+
+def cmd_reopen(graph, key):
+    """Reopen a reviewed finding: swap confirmed/rejected back to pending-review
+    so it can be re-examined (a normal audit action)."""
+    urn = resolve(graph, key)
+    tbl = table_name(urn)
+    tags = graph.get_aspect(urn, GlobalTagsClass) or GlobalTagsClass(tags=[])
+    verdicts = {make_tag_urn("confirmed"), make_tag_urn("rejected")}
+    kept = [t for t in tags.tags if t.tag not in verdicts]
+    if PENDING not in [t.tag for t in kept]:
+        kept.append(TagAssociationClass(tag=PENDING))
+    graph.emit_mcp(MetadataChangeProposalWrapper(
+        entityUrn=urn, aspect=GlobalTagsClass(tags=kept)))
+    print(f"[reviewer] {tbl}: reopened -> pending-review")
+
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("action", choices=["list", "accept", "reject"])
+    p.add_argument("action", choices=["list", "accept", "reject", "reopen"])
     p.add_argument("key", nargs="?", help="hunt id or evidence table substring")
     p.add_argument("--note", default="")
     a = p.parse_args()
     graph = get_graph()
     if a.action == "list":
         cmd_list(graph)
+    elif a.action == "reopen":
+        if not a.key:
+            sys.exit("reopen needs a hunt id or table substring")
+        cmd_reopen(graph, a.key)
     else:
         if not a.key:
             sys.exit("accept/reject need a hunt id or table substring")

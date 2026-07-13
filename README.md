@@ -27,7 +27,8 @@ Every hunt terminates in an **evidence-provenance ledger entry**:
   lineage to every source table touched
 - **tags** — `evidence` + `pending-review`; a human reviewer flips to
   `confirmed`/`rejected`, and the verdict (who/when/why) is stamped into the
-  entity's properties
+  entity's properties. Confirming also raises a **native DataHub Incident** on
+  the asset, so the case's live state is in DataHub itself, not just a tag.
 
 **The money shot:** in the DataHub UI, open a finding → evidence dataset →
 lineage tab → DataJob (SQL visible) → staging tables → raw mailbox files.
@@ -85,6 +86,15 @@ messages and on to the raw corpus. Not a black-box verdict - a chain of custody
 that ends where the evidence actually lives.
 
 ![Lineage: the finding and staging.emails feed the exhibit task that produced the messages](docs/img/06-exhibits-lineage.png)
+
+**8 · The review closes the loop - DataHub *acts*.** Confirming a finding in the
+human-review step raises a native DataHub **Incident** on the asset - a red
+badge, not just a tag. The investigation's state now lives in DataHub's own
+"this asset is under investigation" primitive: category *Fraud Investigation*,
+opened by the reviewer, resolvable in the UI. Metadata stops being a passive log
+and becomes the system of record for the case.
+
+![Confirming a finding raises a native DataHub Incident on the asset](docs/img/07-incident.png)
 
 ## Why not just lineage?
 

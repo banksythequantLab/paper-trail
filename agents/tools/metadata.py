@@ -49,6 +49,24 @@ def table_name(urn):
     """'paper_trail.finance.spe_entities' -> 'finance.spe_entities'"""
     return urn.split(",")[1].removeprefix("paper_trail.")
 
+def raise_incident(graph, resource_urn, title, description,
+                   incident_type="CUSTOM", custom_type="Fraud Investigation"):
+    """Raise a native DataHub Incident on resource_urn via the raiseIncident
+    GraphQL mutation. Returns the new incident urn. This is how a confirmed
+    finding becomes a first-class 'this asset is under investigation' signal in
+    DataHub itself, rather than only a tag."""
+    inp = {"type": incident_type, "title": title,
+           "description": description, "resourceUrn": resource_urn}
+    if incident_type == "CUSTOM":
+        inp["customType"] = custom_type
+    q = ("mutation raiseIncident($input: RaiseIncidentInput!) "
+         "{ raiseIncident(input: $input) }")
+    res = graph.execute_graphql(q, variables={"input": inp})
+    if isinstance(res, dict) and "data" in res:
+        res = res["data"]
+    return res["raiseIncident"]
+
+
 def values_sql(columns, rows):
     """Render rows into a SELECT ... FROM (VALUES ...) statement so
     metadata-derived evidence is still materialized via captured SQL."""

@@ -112,6 +112,11 @@ system of record for the case.
 
 ![Confirming a finding raises a native DataHub Incident on the asset](docs/img/07-incident.png)
 
+The incident lands on the **implicated production table** — here `finance.spe_entities`,
+owned by the departed CAO — as a *Fraud Investigation*, resolvable in the UI:
+
+![The incident on the implicated finance table, owned by the departed officer, resolvable in the UI](docs/img/11-incident-finance.png)
+
 ## The value gate is a native DataHub Assertion
 
 The same golden gate that guards CI is also published *into* DataHub as native
@@ -125,6 +130,8 @@ log. Verified end-to-end: **20/20 checks across six evidence datasets report
 green** (`upsertCustomAssertion` + `reportAssertionResult`, idempotent by URN).
 This is the golden gate ported from a script the judges run to a first-class
 DataHub validation signal the catalog carries.
+
+![The value gate as a passing native DataHub assertion in the evidence dataset's Validation tab](docs/img/10-assertion.png)
 
 ## Event-driven: DataHub *fires actions*, not just stores state
 

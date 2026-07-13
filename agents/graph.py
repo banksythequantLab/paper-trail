@@ -167,7 +167,7 @@ def _arg_coercion_hook(tools):
     return hook
 
 async def build_agent():
-    """LLM-mode agent: Claude + DataHub MCP tools + warehouse tools."""
+    """LLM-mode agent: local Ollama model + DataHub MCP tools + warehouse tools."""
     from langchain_mcp_adapters.client import MultiServerMCPClient
     from langchain_ollama import ChatOllama
     from langgraph.prebuilt import create_react_agent

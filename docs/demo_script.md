@@ -35,11 +35,12 @@ lineage graph.
 
 **Screen:** architecture diagram (15 seconds max on boxes and arrows).
 
-> A LangGraph team: Intake plans the case. Scout grounds every query in the
-> catalog — schemas, tags, glossary. Analyst runs metadata-grounded SQL
-> against DuckDB. And the Scribe writes everything back: evidence datasets,
-> DataJobs holding the exact SQL, lineage to every source touched. Humans
-> review; nothing confirms itself.
+> Two ways to run the same investigation. Five deterministic hunts are the
+> reproducible backbone — grounded in the catalog, they run metadata-checked
+> SQL and write everything back. On top, a single local ReAct agent (qwen3-30b,
+> no cloud) runs the same loop autonomously: ground, query, self-correct, and
+> scribe the results — evidence datasets, DataJobs holding the exact SQL,
+> lineage to every source touched. Humans review; nothing confirms itself.
 
 ## 1:10–1:50 — Live hunt
 

@@ -1,64 +1,45 @@
 # Paper Trail — Devpost Submission Draft
 
-*Paste each section into the Devpost project form; fill the repo + video links at the bottom. Written 2026-07-12. Before submitting, reconcile the two doc notes at the end.*
+*Paste each section into the Devpost form; fill the video link at the bottom. Rewritten 2026-07-13 to lead with one thesis and one story (per judge feedback), not a feature list.*
 
 ## Tagline
-The auditable AI fraud investigator — every conclusion has walkable chain-of-custody lineage in DataHub.
+Paper Trail isn't an AI investigator — it turns AI investigations into **auditable, reviewable metadata with end-to-end chain of custody**, in DataHub.
 
 ## Inspiration
-An AI that flags fraud is useless in audit, compliance, or legal work if it can't show its work. "The model flagged it" is not admissible — a chain of custody is. A metadata graph is exactly a chain-of-custody machine, so we built an agent that treats each investigation as first-class DataHub metadata: not a chat answer, but an evidence trail a human can walk from accusation back to the raw source.
+"The model flagged it" is not admissible in audit, compliance, or legal work. A **chain of custody** is. A metadata catalog is exactly a chain-of-custody machine — so instead of returning a chat answer, Paper Trail treats every investigation as first-class DataHub metadata: an evidence trail a human can walk, review, challenge, and act on — from an accusation back to the raw email that supports it.
 
-## What it does
-Paper Trail works the **real, public** Enron email corpus (435,259 messages) like a forensic team — the emails are genuine; the `finance.*` tables the hunts cross-reference are reconstructed from the public record and labeled as such in DataHub (the contribution is the *pattern*, not the synthetic tables). It lands five confirmed findings, each written back into DataHub as governed, reviewable metadata:
+## What it does (one story)
+Start with a real email. **Jeffrey McMahon — Enron's Treasurer — wrote to the heads of the trading businesses (Delainey, Kitchen, Lavorato) about "2002 Corporate Allocations," eight days before Enron announced a ~$618M quarterly loss.** Paper Trail finds the statistical anomaly that surfaces that week (a z=4.43 spike in Finance↔Trading communication), and then does the thing a chatbot can't: it writes the finding back into DataHub as a walkable evidence ledger.
 
-| # | Hunt | Finding |
-|---|------|---------|
-| 1 | Restatement-window comm spikes | z=4.43 email-volume anomaly the week of Oct 8 2001 — 8 days before Enron's Oct 16 Q3-loss announcement |
-| 2 | Material-info leakage | 120 pre-disclosure emails about undisclosed SPEs reached 43 external addresses (top domains: personal AOL webmail, outside counsel velaw.com/cwt.com) |
-| 3 | SPE shadow web | 8 off-glossary shadow vehicles (marlin, osprey, talon, yosemite, rawhide, fishtail, condor, porcupine) co-mentioned with known SPEs — all real Enron entities |
-| 4 | Orphaned ownership | 3 financially-material datasets owned by departed, implicated officers (Fastow, Causey); none certified |
-| 5 | Provenance gaps | those same 3 datasets have zero documented lineage — fraud in the data governance itself |
+Open the finding in the DataHub UI and walk it:
+**evidence dataset → the verbatim SQL that produced it → its lineage → the individual messages (`hunt1_exhibits`) → `staging.emails`.** Five clicks from a z-score to the Treasurer's actual email. A human reviewer confirms it — and DataHub **raises a native Incident** on the asset and an **event-driven Action** fires downstream. Every step — who reviewed it, when, why, and the exact SQL — is stamped into the catalog as governed metadata.
 
-Every finding terminates in an evidence-provenance ledger entry: an **evidence Dataset** (the finding as a real table, with hypothesis, method, thresholds), a **DataJob** holding the *verbatim* SQL plus input lineage to every source table, and **tags** (`evidence`, `pending-review`). A human reviewer flips pending-review → confirmed/rejected and the verdict is stamped into the entity. The payoff: in the DataHub UI, open a finding → evidence dataset → lineage → DataJob (SQL visible) → staging tables → raw mailbox files. **Five clicks from accusation to evidence.**
+## What makes it different from ordinary DataHub
+A traditional catalog *describes* data. Paper Trail turns *investigations* into governed metadata that can be reviewed, audited, challenged, and **acted upon**:
+- **Chain of custody, literal.** The provenance walk ends on the real messages between named executives — not a summary table.
+- **DataHub participates, it doesn't just store.** Confirming a finding raises a native **Incident** (red badge, category "Fraud Investigation"); a custom **Action** on DataHub's own event stream fires a webhook the moment a review state changes.
+- **Verification you can trust.** `verify_golden.py` re-derives every headline number and asserts it against a checked-in golden — a planted wrong value (z=2.1) **fails** the gate, proving the verifier can reject, not just confirm.
+- **The review has teeth.** A planted red-team decoy — a benign automated-broadcast surge (1,399 messages the week of the SEC inquiry, a *bigger* z-score than the real finding) — is flagged, then **rejected** by a human, with the rejection reason stamped into the ledger like a confirmation. The pipeline doesn't just confirm what it's fed.
+
+## The agent (stated honestly — the honesty is the point)
+The **deterministic hunts are the source of truth**: a reproducible verification layer (`verify_hunts.py` for shape, `verify_golden.py` for values) that the evidence ledger depends on. On top of that, a **fully local LLM agent** (qwen3-30b via Ollama, no cloud API) proves the harder claim: an autonomous agent can reproduce the same finding and **pass the same verification gate** (`agents/run_gate.py` — drop the evidence table, run the agent, and it rebuilds a table that passes `verify_golden` 20/20). We don't oversell it: the local model is best-effort, and the gate-passing run is a *directed* investigation. The design point is that a machine-written finding is held to the exact same auditable standard as a human-written one.
+
+## What's real vs. demonstrated (up front, on purpose)
+The email corpus is **real and public** (CMU Enron corpus, 435,259 messages). Hunts **1–2 are discoveries on that real data** (the comm-spike and pre-disclosure external leakage). Hunts **3–5 demonstrate the governance-audit capability** — shadow-entity co-mention, orphaned ownership, and provenance gaps — over `finance.*` tables that are **reconstructed from the public Enron record and labeled as such** in DataHub. The contribution is the *auditable pattern*, not the reconstructed tables. Full mapping in `docs/ground_truth.md`.
 
 ## How we built it
-- **DataHub OSS quickstart (v1.5.0.6)** as the context + provenance layer; **`mcp-server-datahub`** (mutations enabled) as the agent's hands.
-- A **DuckDB** warehouse of the parsed corpus, plus a full metadata model bootstrapped into DataHub — ownership, glossary, domains, lineage, and deliberate governance defects to hunt.
-- **Deterministic hunts** (hunt1–5): each grounds in metadata, runs metadata-checked SQL, materializes evidence, and writes the ledger via the **acryl-datahub SDK** (MCP mutations can't create Datasets/DataJobs). `verify_hunts.py` walks every paper trail end-to-end (→ VERIFY_PASS).
-- An **LLM investigator** (LangGraph ReAct agent) wired to **18 DataHub MCP tools + 3 warehouse tools** — running on a **fully local open model (qwen3-30b-a3b via Ollama)**, no proprietary API.
-- A **Streamlit case board** for the human-in-the-loop review step.
-
-## Challenges we ran into
-The hardest part was making a local 30B model reliable at MCP tool-calling. Local models fumble tool schemas — passing dicts where DSL strings belong, invalid enum values, malformed JSON that 400s the server, and death-spiral loops that repeat a zero-result call until the graph hits its recursion limit. We built a layered fix: an **argument-coercion shim** (dict→JSON/DSL/array normalization, enum dropping), a **retry wrapper** so a diverging temperature can recover from bad tool JSON, a **loop-breaker** that redirects repeated identical calls to a "stop and summarize" nudge, and a **turn-budget nudge** that forces the final FINDINGS summary before the step budget runs out. The result is a fully local agent that grounds, queries, self-corrects, and ends with a structured, provenance-backed summary — no cloud model in the loop.
+DataHub OSS quickstart (v1.5.0.6) as the provenance layer; `mcp-server-datahub` as the agent's grounding; a DuckDB warehouse of the parsed corpus; the acryl-datahub SDK for write-back (evidence Datasets + DataJobs with verbatim SQL + lineage + tags/glossary/domains + Incidents); a custom `datahub-actions` pipeline on the Kafka event stream; a Streamlit case board for human review; a local LangGraph ReAct agent on Ollama. Green GitHub Actions CI. The pattern is upstreamed as a reusable `datahub-investigate` skill (PR #34 to datahub-project/datahub-skills).
 
 ## Accomplishments we're proud of
-- **Auditability:** five clicks from an accusation to the raw email that supports it — no black-box verdicts.
-- **Governance-as-a-hunt:** hunt 5 finds the fraud *in the data governance itself* — orphaned, unlineaged, financially-material tables owned by departed officers.
-- **Runs fully local** (qwen3-30b via Ollama): no data leaves the box and runs reproduce offline — the privacy properties that matter in finance/compliance. The headline is the *auditable output*, not that it's local.
-- **Reliability by design:** the deterministic hunts are the backbone — `verify_hunts.py` reproduces all five findings end-to-end, every run. The LLM agent demonstrates the *same* investigation autonomously (grounds, queries, self-corrects, ends with a FINDINGS summary) on a warm run; it's a best-effort capability, not batch-reliable — which is exactly why the reproducible hunts, not the model, are what the evidence ledger depends on.
-- The pattern is **reusable and upstreamed** as a DataHub skill (PR #34).
+Five clicks from an accusation to the raw email; a value-level verifier that can *reject* a wrong number; a review loop that rejects a plausible false positive; DataHub that *acts* (Incident + Action) rather than just stores; and a fully local agent held to the same audit standard as the deterministic backbone.
 
-## What we learned
-Metadata isn't documentation — it's the substrate for trustworthy AI. When every claim must cite a materialized evidence table and its producing SQL, a "hallucinated finding" stops being expressible. And a mid-size open model, with the right guardrails, can drive a real multi-tool investigation locally.
-
-## What's next for Paper Trail
-- A live, judge-browsable catalog (findings + lineage), hosted for the Aug 17–31 judging window.
-- More hunt types; generalize beyond the Enron corpus to any DataHub-catalogued warehouse.
-- Land the `datahub-investigate` skill upstream.
+## What's next
+A live, judge-browsable hosted catalog for the Aug 17–31 window; a committed minimal-runnable snapshot (compose + a small warehouse dump) so anyone can reproduce a finding out of the box; a genuinely undirected agent run, logged verbatim; and landing the skill upstream.
 
 ## Built with
-DataHub (OSS) · mcp-server-datahub · LangGraph · Ollama (qwen3-30b-a3b) · DuckDB · acryl-datahub SDK · Streamlit · Python
+DataHub (OSS) · mcp-server-datahub · DataHub Incidents + Actions (Kafka) · LangGraph · Ollama (qwen3-30b-a3b) · DuckDB · acryl-datahub SDK · Streamlit · Python
 
 ## Links
-- **Repo:** https://github.com/banksythequantLab/paper-trail
-- **Demo video:** `<add link>`
+- **Repo (public):** https://github.com/banksythequantLab/paper-trail
+- **Demo video:** `<add YouTube/Vimeo link>`
 - **OSS skill PR:** https://github.com/datahub-project/datahub-skills/pull/34
-
-## Honest labeling (keep this in the submission)
-The email corpus is real and public (CMU Enron corpus, May 2015 release). The `finance.*` tables (transactions, SPE entities, restatement events) are reconstructed for the demo from the public record and labeled as such in their DataHub descriptions. Entity names, dates, and disclosure windows follow the historical record.
-
-## Status (Claude's notes)
-All three doc issues the judges flagged are now fixed in the repo: LLM backend corrected to local Ollama; hunt-1 timing reconciled to **week of Oct 8 2001, 8 days before the Oct 16 Q3-loss announcement, z=4.43** (README + `ui/case_board.py`); and the README architecture rewritten to describe the actual single ReAct agent + deterministic hunts (was overclaimed as a 5-agent supervisor). A "why not just lineage?" section was added per judge feedback.
-
-Open before submitting: (1) record the demo video (use a warm run — the local model slows under sustained back-to-back load); (2) optional live hosted catalog for the Aug 17–31 window. Reliability is framed deterministic-first (5/5 hunts always; LLM = best-effort autonomous demo) after a repeat-run test showed the local 30B degrades under continuous load — so we don't claim an LLM pass-rate.
-

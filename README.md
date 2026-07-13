@@ -1,10 +1,14 @@
 # Paper Trail
 
-**The auditable AI fraud investigator.** An AI agent that works the Enron email
-corpus like a forensic team — and every conclusion it reaches has walkable
-chain-of-custody lineage in DataHub, down to the individual emails. No black-box
-verdicts: click any finding and trace it back through the exact SQL, intermediate
-datasets, and source tables to the raw messages that triggered it.
+**Paper Trail turns AI investigations into auditable, reviewable metadata with
+end-to-end chain of custody.** It works the real, public Enron email corpus like
+a forensic team and writes every conclusion back into DataHub as a walkable
+evidence trail — click any finding and trace it through the exact SQL,
+intermediate datasets, and source tables down to the individual raw emails that
+triggered it. No black-box verdicts.
+
+A traditional catalog *describes* data. Paper Trail turns *investigations* into
+governed metadata that can be reviewed, audited, challenged, and **acted upon**.
 
 Built for **"Build with DataHub: The Agent Hackathon"** (2026). Apache 2.0.
 
@@ -134,7 +138,14 @@ finds what was planted and a review process with teeth.
 
 Lineage tells you _what_ connects to _what_. An evidence ledger also answers _why a finding exists_: the hypothesis and thresholds live in the evidence dataset's description, the **verbatim SQL** that produced it lives in the DataJob, _who approved it and when_ is stamped into properties on review, and _how the case evolved_ is visible across runs. Ordinary catalog lineage can't answer "who signed off on this, and on what basis?" — a chain of custody can. That's the difference between metadata as documentation and metadata as evidence.
 
-## The five hunts (all confirmed on the real corpus)
+## The five hunts
+
+Hunts **1–2 are discoveries on the real, public Enron corpus**. Hunts **3–5
+demonstrate the governance-audit capability** over `finance.*` tables that are
+reconstructed from the public Enron record and labeled as such in DataHub (see
+[Honest labeling](#honest-labeling) and `docs/ground_truth.md`). The contribution
+is the auditable *pattern* a human can review and challenge — not the
+reconstructed tables.
 
 | # | Hunt | Finding |
 |---|------|---------|

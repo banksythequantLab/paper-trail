@@ -67,12 +67,23 @@ def _local_tools():
 
     @tool
     def materialize_evidence(table: str, select_sql: str) -> str:
-        """Materialize evidence: CREATE TABLE analytics.<table> AS <select_sql>."""
+        """Materialize evidence as analytics.<table>. Pass a BARE name
+        (e.g. "comm_spikes") OR "analytics.comm_spikes" -- both work. select_sql
+        should be a plain SELECT (recommended); a full "CREATE TABLE ... AS
+        SELECT ..." is also accepted and the CREATE wrapper is stripped. Example:
+        materialize_evidence(table="comm_spikes", select_sql="SELECT sender, week,
+        n FROM curated.comm_edges WHERE n > 10")."""
         try:
             n = warehouse.write_evidence(table, select_sql)
+            name = warehouse.normalize_evidence_table(table)
         except Exception as e:
-            return f"SQL ERROR (fix the query and retry): {e}"
-        return f"created {table} with {n} rows"
+            return ("SQL ERROR (fix and retry). Correct call shape: "
+                    'materialize_evidence(table="comm_spikes", '
+                    'select_sql="SELECT sender, week, n FROM curated.comm_edges '
+                    'WHERE n > 10"). '
+                    f"Details: {e}")
+        return (f"created {name} with {n} rows. "
+                f"Use evidence_table='{name}' when you record the finding.")
 
     @tool
     def record_finding_tool(hunt_id: str, title: str, narrative: str, sql: str,
@@ -80,6 +91,7 @@ def _local_tools():
                             confidence: str) -> str:
         """Record a finding in the DataHub ledger with lineage. input_tables are
         warehouse tables the SQL read from. confidence: low|medium|high."""
+        evidence_table = warehouse.normalize_evidence_table(evidence_table)
         try:
             ev, job = ledger.record_finding(hunt_id, title, narrative, sql,
                                             evidence_table, input_tables, confidence=confidence)
@@ -148,20 +160,43 @@ def _arg_coercion_hook(tools):
             # zero-result repeat can't burn the recursion limit before FINDINGS.
             sig = (tc["name"], json.dumps(args, sort_keys=True, default=str))
             seen[sig] += 1
-            if tc["name"] != "investigator_note" and turns[0] >= summary_turn:
+            # Let the write-back tools through even near budget -- completing the
+            # ledger entry is the goal; don't pre-empt it with a summary nudge.
+            if (tc["name"] not in ("investigator_note", "materialize_evidence",
+                                   "record_finding_tool")
+                    and turns[0] >= summary_turn):
                 tc["args"] = {"note": (
                     f"STEP BUDGET NEARLY EXHAUSTED (turn {turns[0]}). Do NOT call any more "
-                    f"tools. Write your final FINDINGS summary NOW as your reply: a numbered "
-                    f"list, each item naming the dataset, owner, risk, and evidence table/URN "
-                    f"(system rule 7).")}
+                    f"read/query tools. If you materialized evidence, record the finding "
+                    f"now with record_finding_tool, THEN write your final FINDINGS summary "
+                    f"as your reply: a numbered list, each item naming the dataset, owner, "
+                    f"risk, and evidence table/URN (system rule 7).")}
                 tc["name"] = "investigator_note"
             elif tc["name"] != "investigator_note" and seen[sig] >= repeat_limit:
-                tc["args"] = {"note": (
-                    f"You have issued this exact {tc['name']} call {seen[sig]} times "
-                    f"with identical arguments and it returned nothing new. STOP "
-                    f"repeating it. If you have gathered enough evidence, write your "
-                    f"final FINDINGS summary now (system rule 7). Otherwise change "
-                    f"your arguments or use a different tool.")}
+                if tc["name"] in ("materialize_evidence", "record_finding_tool"):
+                    # REPAIR, don't abort: the write-back is the whole point. Hand
+                    # back the exact correct call shape so a stuck retry can recover
+                    # instead of being forced into an early FINDINGS summary.
+                    note = (
+                        f"Your {tc['name']} call keeps failing with the same arguments. "
+                        f"Change them. Correct shapes:\n"
+                        'materialize_evidence(table="comm_spikes", '
+                        'select_sql="SELECT sender, week, n FROM curated.comm_edges WHERE n > 10")'
+                        "  — bare table name, a plain SELECT (no CREATE, no semicolon).\n"
+                        'record_finding_tool(hunt_id="blind_1", title="...", '
+                        'narrative="...", sql="<the SELECT you used>", '
+                        'evidence_table="analytics.comm_spikes", '
+                        'input_tables=["curated.comm_edges"], confidence="medium")'
+                        "  — evidence_table must be one you already materialized.")
+                    seen[sig] = 0  # allow one corrected attempt before nudging again
+                else:
+                    note = (
+                        f"You have issued this exact {tc['name']} call {seen[sig]} times "
+                        f"with identical arguments and it returned nothing new. STOP "
+                        f"repeating it. If you have gathered enough evidence, write your "
+                        f"final FINDINGS summary now (system rule 7). Otherwise change "
+                        f"your arguments or use a different tool.")
+                tc["args"] = {"note": note}
                 tc["name"] = "investigator_note"
         return {"messages": [last]}
     return hook

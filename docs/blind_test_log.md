@@ -66,3 +66,38 @@ best-effort." Bounded by the two runs:
 
 The evidence ledger a human audits is therefore written by the reproducible hunts; the
 agent is a real, improving capability shown here without a highlight reel.
+
+## Update — Tier-1 fixes: the write-back now completes, locally, no cloud
+
+The failure above was **tool ergonomics, not model capability.** The agent reasoned
+fine; it tripped on the `materialize_evidence` contract. Three local fixes (no bigger
+model, no cloud):
+
+1. **Forgiving contract** (`agents/tools/warehouse.py`) — `materialize_evidence` now
+   accepts a bare table name (normalized to `analytics.<name>`) and strips an embedded
+   `CREATE ... AS` if the model puts one in `select_sql`. Both original stumbles are
+   removed. Regression test: `tests/test_evidence_contract.py`.
+2. **Repair loop** (`agents/graph.py`) — a stuck write call is handed the exact correct
+   call shape instead of being forced into an early summary, and the two write tools are
+   allowed through even near the step budget so the ledger entry can complete.
+3. **Worked one-shot example** in the blind system prompt showing run_sql →
+   materialize_evidence (bare name, plain SELECT) → record_finding_tool.
+
+**Result (verified live, same local hardware, RTX 3090, 19.4 / 24 GB VRAM):** the same
+undirected blind run now **completes the governed write-back** — evidence materialized
+*and* the finding recorded to the DataHub ledger (real `urn:li:dataJob` / `urn:li:dataset`
+URNs). Confirmed on the **original `qwen3:30b-a3b` model** (2–3 findings) and on
+`qwen3-coder:30b` (3 findings).
+
+**Reliability this session:** across **7 blind runs** with the Tier-1 fixes active, **6
+completed the governed write-back** (recorded ≥1 finding with a real ledger URN). The
+single miss was a step-budget misconfiguration (the recursion limit was hit before the
+"wrap up" nudge fired) — a harness bug, not a contract failure; it is fixed
+(`agents/reliability_blind.py`), and both runs after the fix passed.
+
+**Honest caveats that stay.** This is a handful of runs, not a large-N distribution. The
+undirected findings are surface-level data-quality / governance items (skewed top
+senders, external addresses, a curated-pipeline gap) — **none is a fraud discovery**,
+consistent with GROUND_TRUTH.md. The directed run still passes the gate 20/20, and the
+reproducible hunts remain the source of truth. What changed is narrow and real: on local
+hardware, the undirected agent now reliably closes the loop it previously couldn't.

@@ -34,8 +34,19 @@ SYSTEM = (
     "curated.comm_edges(sender,recipient,week,n), finance.spe_entities(name,...), "
     "finance.restatement_events(event_date,...), analytics.* (your outputs). Use schema.table "
     "names directly. Explore the data yourself and decide what is worth investigating. When a "
-    "tool errors, fix the arguments; never repeat an identical call. End with a FINDINGS summary "
-    "of what you actually found and how confident you are."
+    "tool errors, fix the arguments; never repeat an identical call.\n\n"
+    "WORKED EXAMPLE — follow this exact call shape to turn an observation into a recorded "
+    "finding (do this for anything notable):\n"
+    "1) run_sql: SELECT sender, count(*) AS n FROM staging.emails GROUP BY 1 ORDER BY n DESC\n"
+    "2) materialize_evidence(table=\"top_senders\", select_sql=\"SELECT sender, count(*) AS n "
+    "FROM staging.emails GROUP BY 1 ORDER BY n DESC\")  -> creates analytics.top_senders. "
+    "Pass a BARE table name and a PLAIN SELECT: no CREATE, no trailing semicolon.\n"
+    "3) record_finding_tool(hunt_id=\"blind_top_senders\", title=\"...\", narrative=\"...\", "
+    "sql=\"<the SELECT from step 2>\", evidence_table=\"analytics.top_senders\", "
+    "input_tables=[\"staging.emails\"], confidence=\"medium\")\n"
+    "Always materialize BEFORE you record; evidence_table is the analytics.<name> you just "
+    "created. Record every real anomaly this way, THEN end with a FINDINGS summary of what you "
+    "found and how confident you are."
 )
 
 DIRECTIVE = (
